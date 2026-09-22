@@ -1,0 +1,6 @@
+{
+  "name": "Payroll Pro - Manajemen Gaji, Absensi & Kas Proyek",
+  "description": "Sistem penggajian harian & bulanan, absensi matriks centang per tanggal, manajemen kasbon, buku kas masuk/keluar (material, operasional, tak terduga), audit log, dan slip WhatsApp.",
+  "requestFramePermissions": [],
+  "majorCapabilities": ["MAJOR_CAPABILITY_SERVER_SIDE_GEMINI_API"]
+}
