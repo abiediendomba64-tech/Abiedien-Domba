@@ -252,7 +252,7 @@ export default function App() {
   }, [karyawanList, searchTerm, statusFilter, gajiFilter, sortBy]);
 
   // 5. Employee CRUD Actions
-  const handleSaveEmployee = (data: Omit<Karyawan, 'id'> & { id?: number | string }) => {
+  const handleSaveEmployee = async (data: Omit<Karyawan, 'id'> & { id?: number | string }) => {
     if (data.id !== undefined) {
       // Update existing
       setKaryawanList((prev) =>
@@ -263,7 +263,8 @@ export default function App() {
 
       // Sync to Google Sheet if connected
       if (sheetsConfig.scriptUrl) {
-        sendToGoogleSheet(sheetsConfig.scriptUrl, 'PUT', data);
+        const sync = await sendToGoogleSheet(sheetsConfig.scriptUrl, 'PUT', data);
+        if (!sync.success) showToast('Data lokal tersimpan, tetapi Google Sheets gagal diperbarui: ' + sync.error);
       }
     } else {
       // Create new with auto-increment ID
@@ -278,14 +279,15 @@ export default function App() {
 
       // Sync to Google Sheet if connected
       if (sheetsConfig.scriptUrl) {
-        sendToGoogleSheet(sheetsConfig.scriptUrl, 'POST', newEmployee);
+        const sync = await sendToGoogleSheet(sheetsConfig.scriptUrl, 'POST', newEmployee);
+        if (!sync.success) showToast('Data lokal tersimpan, tetapi Google Sheets gagal diperbarui: ' + sync.error);
       }
     }
     setIsEmployeeModalOpen(false);
     setEditingKaryawan(null);
   };
 
-  const handleToggleStatus = (id: number | string, currentStatus: StatusPembayaran) => {
+  const handleToggleStatus = async (id: number | string, currentStatus: StatusPembayaran) => {
     const nextStatus: StatusPembayaran = currentStatus === 'Pending' ? 'Bayar' : 'Pending';
     setKaryawanList((prev) =>
       prev.map((k) => (k.id === id ? { ...k, status: nextStatus } : k))
@@ -298,7 +300,8 @@ export default function App() {
 
       // Sync to Google Sheet if connected
       if (sheetsConfig.scriptUrl) {
-        sendToGoogleSheet(sheetsConfig.scriptUrl, 'PUT', { ...targetKaryawan, status: nextStatus });
+        const sync = await sendToGoogleSheet(sheetsConfig.scriptUrl, 'PUT', { ...targetKaryawan, status: nextStatus });
+        if (!sync.success) showToast('Status lokal berubah, tetapi Google Sheets gagal diperbarui: ' + sync.error);
       }
     }
   };
@@ -307,7 +310,7 @@ export default function App() {
     setDeleteEmployeeTarget({ id, nama });
   };
 
-  const executeDeleteEmployee = () => {
+  const executeDeleteEmployee = async () => {
     if (!deleteEmployeeTarget) return;
     const { id, nama } = deleteEmployeeTarget;
     setKaryawanList((prev) => prev.filter((k) => k.id !== id));
@@ -316,7 +319,8 @@ export default function App() {
 
     // Sync to Google Sheet if connected
     if (sheetsConfig.scriptUrl) {
-      sendToGoogleSheet(sheetsConfig.scriptUrl, 'DELETE', { id });
+      const sync = await sendToGoogleSheet(sheetsConfig.scriptUrl, 'DELETE', { id });
+      if (!sync.success) showToast('Data lokal terhapus, tetapi Google Sheets gagal diperbarui: ' + sync.error);
     }
     setDeleteEmployeeTarget(null);
   };

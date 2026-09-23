@@ -467,30 +467,6 @@ export const INITIAL_TRANSAKSI_KAS = [
   }
 ];
 
-export const INITIAL_AUDIT_LOG = [
-  {
-    id: 'aud-1',
-    timestamp: '2026-09-21 20:00:00',
-    actor: 'Abiedien Domba (PJ)',
-    action: 'Setup Sistem Payroll Pro',
-    target: 'Konfigurasi Proyek',
-    details: 'Inisialisasi sistem penggajian, absensi, kasbon, dan buku kas proyek.'
-  },
-  {
-    id: 'aud-2',
-    timestamp: '2026-09-21 21:15:30',
-    actor: 'Bendahara Proyek',
-    action: 'Pencatatan Kas Masuk',
-    target: 'Termin Tahap 2 Owner',
-    details: 'Pemasukan Rp 15.000.000 dari Bpk. H. Rahmat berhasil diverifikasi.'
-  },
-  {
-    id: 'aud-3',
-    timestamp: '2026-09-21 22:10:14',
-    actor: 'Mandor Lapangan',
-    action: 'Presensi Matriks Harian',
-    target: 'Absensi Pekerja',
-    details: 'Pembaruan checklist kehadiran 6 orang karyawan pada tanggal 21 September 2026.'
-  }
-];
-
+// Audit log starts empty. Audit entries must represent actions actually performed
+// in the current browser/session; demo history must never be presented as real audit evidence.
+export const INITIAL_AUDIT_LOG: any[] = [];

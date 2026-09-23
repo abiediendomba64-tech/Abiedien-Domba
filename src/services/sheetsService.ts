@@ -39,11 +39,15 @@ function doGet(e) {
 
 function doPost(e) {
   try {
+    const body = JSON.parse(e.postData.contents || "{}");
+    const method = String(body._method || "POST").toUpperCase();
+    if (method === "PUT") return updateEmployee(body);
+    if (method === "DELETE") return deleteEmployee(body);
+    if (method !== "POST") return responseJSON({ success: false, error: "Method tidak didukung" }, 400);
+
     const sheet = getSheet();
-    const body = JSON.parse(e.postData.contents);
     const data = sheet.getDataRange().getValues();
     const newId = data.length > 1 ? Number(data[data.length - 1][0]) + 1 : 1;
-    
     const newRow = [
       body.id || newId,
       body.kode || "",
@@ -58,12 +62,38 @@ function doPost(e) {
       body.no_wa || "",
       body.catatan || ""
     ];
-    
     sheet.appendRow(newRow);
-    return responseJSON({ success: true, id: newId });
+    return responseJSON({ success: true, operation: "created", id: body.id || newId });
   } catch (err) {
-    return responseJSON({ error: err.message }, 500);
+    return responseJSON({ success: false, error: err.message }, 500);
   }
+}
+
+function updateEmployee(body) {
+  const sheet = getSheet();
+  const data = sheet.getDataRange().getValues();
+  const id = body.id;
+  const rowIndex = data.findIndex(r => String(r[0]) === String(id));
+  if (rowIndex <= 0) return responseJSON({ success: false, error: "Data karyawan tidak ditemukan" }, 404);
+
+  const updatedRow = [
+    id, body.kode || "", body.nama || "", body.pekerjaan || "",
+    body.jenis_gaji || "Harian", Number(body.gaji_per_hari) || 0,
+    Number(body.hari_kerja) || 0, Number(body.total_gaji) || 0,
+    body.tanggal || "", body.status || "Pending", body.no_wa || "", body.catatan || ""
+  ];
+  sheet.getRange(rowIndex + 1, 1, 1, updatedRow.length).setValues([updatedRow]);
+  return responseJSON({ success: true, operation: "updated", id });
+}
+
+function deleteEmployee(body) {
+  const sheet = getSheet();
+  const data = sheet.getDataRange().getValues();
+  const id = body.id;
+  const rowIndex = data.findIndex(r => String(r[0]) === String(id));
+  if (rowIndex <= 0) return responseJSON({ success: false, error: "Data karyawan tidak ditemukan" }, 404);
+  sheet.deleteRow(rowIndex + 1);
+  return responseJSON({ success: true, operation: "deleted", id });
 }
 
 function doPut(e) {
@@ -178,7 +208,13 @@ export async function sendToGoogleSheet(url: string, action: 'POST' | 'PUT' | 'D
       body: JSON.stringify({ ...payload, _method: action }),
     });
 
-    const result = await response.json().catch(() => ({ success: true }));
+    const result = await response.json().catch(() => null);
+    if (!response.ok) {
+      return { success: false, error: result?.error || `HTTP ${response.status}`, data: result };
+    }
+    if (!result || result.success !== true) {
+      return { success: false, error: result?.error || 'Google Apps Script tidak mengonfirmasi operasi berhasil', data: result };
+    }
     return { success: true, data: result };
   } catch (err: any) {
     return { success: false, error: err.message || 'Gagal terhubung ke Google Apps Script' };
