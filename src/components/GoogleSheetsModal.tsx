@@ -101,7 +101,7 @@ export const GoogleSheetsModal: React.FC<GoogleSheetsModalProps> = ({
                 </span>
               </h3>
               <p className="text-xs text-slate-500">
-                Gunakan Google Sheets sebagai database cloud tanpa biaya langganan bulanan.
+                Gunakan Google Sheets sebagai penyimpanan/sinkronisasi opsional. Data utama aplikasi tetap tersimpan lokal di perangkat sampai sinkronisasi berhasil.
               </p>
             </div>
           </div>
